@@ -7,7 +7,7 @@
 // ----------------------------------------------------------------
 
 #include "Game.h"
-#include <GLFW/glfw3.h>
+#include <GL/glew.h>
 #include "Texture.h"
 #include "VertexArray.h"
 #include "Shader.h"
@@ -64,7 +64,8 @@ bool Game::Initialize()
 	mContext = SDL_GL_CreateContext(mWindow);
 	
 	// Initialize GLEW
-	if (glfwInit() != GLFW_TRUE)
+	glewExperimental = GL_TRUE;
+	if (glewInit() != GLEW_OK)
 	{
 		SDL_Log("Failed to initialize GLEW.");
 		return false;

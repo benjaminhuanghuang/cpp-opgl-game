@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "/usr/local/Cellar/sdl2/2.0.9_1/include",
-                "/usr/local/Cellar/glfw/3.3/include",
+                "/usr/local/Cellar/glew/2.1.0/include",
                 "/usr/local/include"
             ],
             "defines": [],
