@@ -15,6 +15,8 @@
 #include "Ship.h"
 #include "Asteroid.h"
 #include "Random.h"
+#include "Texture.h"
+#include "Shader.h"
 
 Game::Game() : mWindow(nullptr), mIsRunning(true), mUpdatingActors(false)
 {
@@ -72,13 +74,12 @@ that are deprecated (no longer intended for use).
 	// so clear it
 	glGetError();
 
-	if (IMG_Init(IMG_INIT_PNG) == 0)
+	// Make sure we can create/compile shaders
+	if (!LoadShaders())
 	{
-		SDL_Log("Unable to initialize SDL_image: %s", SDL_GetError());
+		SDL_Log("Failed to load shaders.");
 		return false;
 	}
-
-	Random::Init();
 
 	LoadData();
 
@@ -183,6 +184,21 @@ void Game::GenerateOutput()
 	SDL_GL_SwapWindow(mWindow);
 }
 
+bool Game::LoadShaders()
+{
+	mSpriteShader = new Shader();
+	if (!mSpriteShader->Load("Shaders/Sprite.vert", "Shaders/Sprite.frag"))
+	{
+		return false;
+	}
+
+	mSpriteShader->SetActive();
+	// Set the view-projection matrix
+	Matrix4 viewProj = Matrix4::CreateSimpleViewProj(1024.f, 768.f);
+	mSpriteShader->SetMatrixUniform("uViewProj", viewProj);
+	return true;
+}
+
 void Game::LoadData()
 {
 	// Create player's ship
@@ -210,41 +226,33 @@ void Game::UnloadData()
 	// Destroy textures
 	for (auto i : mTextures)
 	{
-		SDL_DestroyTexture(i.second);
+		i.second->Unload();
+		delete i.second;
 	}
 	mTextures.clear();
 }
 
-SDL_Texture *Game::GetTexture(const std::string &fileName)
+Texture* Game::GetTexture(const std::string& fileName)
 {
-	SDL_Texture *tex = nullptr;
-	// // Is the texture already in the map?
-	// auto iter = mTextures.find(fileName);
-	// if (iter != mTextures.end())
-	// {
-	// 	tex = iter->second;
-	// }
-	// else
-	// {
-	// 	// Load from file
-	// 	SDL_Surface *surf = IMG_Load(fileName.c_str());
-	// 	if (!surf)
-	// 	{
-	// 		SDL_Log("Failed to load texture file %s", fileName.c_str());
-	// 		return nullptr;
-	// 	}
-
-	// 	// Create texture from surface
-	// 	tex = SDL_CreateTextureFromSurface(mRenderer, surf);
-	// 	SDL_FreeSurface(surf);
-	// 	if (!tex)
-	// 	{
-	// 		SDL_Log("Failed to convert surface to texture for %s", fileName.c_str());
-	// 		return nullptr;
-	// 	}
-
-	// 	mTextures.emplace(fileName.c_str(), tex);
-	// }
+	Texture* tex = nullptr;
+	auto iter = mTextures.find(fileName);
+	if (iter != mTextures.end())
+	{
+		tex = iter->second;
+	}
+	else
+	{
+		tex = new Texture();
+		if (tex->Load(fileName))
+		{
+			mTextures.emplace(fileName, tex);
+		}
+		else
+		{
+			delete tex;
+			tex = nullptr;
+		}
+	}
 	return tex;
 }
 
