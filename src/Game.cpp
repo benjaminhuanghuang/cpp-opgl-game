@@ -80,7 +80,9 @@ that are deprecated (no longer intended for use).
 		SDL_Log("Failed to load shaders.");
 		return false;
 	}
-
+	// Create quad for drawing sprites
+	CreateSpriteVerts();
+	
 	LoadData();
 
 	mTicksCount = SDL_GetTicks();
@@ -173,14 +175,25 @@ void Game::UpdateGame()
 
 void Game::GenerateOutput()
 {
-	// Set the clear color to gray
-	glClearColor(0.86f, 0.0f, 0.86f, 1.0f);
+	// Set the clear color to grey
+	glClearColor(0.86f, 0.86f, 0.86f, 1.0f);
 	// Clear the color buffer
 	glClear(GL_COLOR_BUFFER_BIT);
+	
+	// Draw all sprite components
+	// Enable alpha blending on the color buffer
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+	// Set shader/vao as active
+	mSpriteShader->SetActive();
+	mSpriteVerts->SetActive();
+	for (auto sprite : mSprites)
+	{
+		sprite->Draw(mSpriteShader);
+	}
 
-	// TODO: Draw the scene
-
-	// Swap the buffers, which also displays the scene
+	// Swap the buffers
 	SDL_GL_SwapWindow(mWindow);
 }
 
@@ -197,6 +210,23 @@ bool Game::LoadShaders()
 	Matrix4 viewProj = Matrix4::CreateSimpleViewProj(1024.f, 768.f);
 	mSpriteShader->SetMatrixUniform("uViewProj", viewProj);
 	return true;
+}
+
+void Game::CreateSpriteVerts()
+{
+	float vertices[] = {
+		-0.5f,  0.5f, 0.f, 0.f, 0.f, // top left
+		 0.5f,  0.5f, 0.f, 1.f, 0.f, // top right
+		 0.5f, -0.5f, 0.f, 1.f, 1.f, // bottom right
+		-0.5f, -0.5f, 0.f, 0.f, 1.f  // bottom left
+	};
+
+	unsigned int indices[] = {
+		0, 1, 2,
+		2, 3, 0
+	};
+
+	mSpriteVerts = new VertexArray(vertices, 4, indices, 6);
 }
 
 void Game::LoadData()
@@ -232,9 +262,9 @@ void Game::UnloadData()
 	mTextures.clear();
 }
 
-Texture* Game::GetTexture(const std::string& fileName)
+Texture *Game::GetTexture(const std::string &fileName)
 {
-	Texture* tex = nullptr;
+	Texture *tex = nullptr;
 	auto iter = mTextures.find(fileName);
 	if (iter != mTextures.end())
 	{
@@ -274,7 +304,10 @@ void Game::RemoveAsteroid(Asteroid *ast)
 void Game::Shutdown()
 {
 	UnloadData();
-	IMG_Quit();
+	delete mSpriteVerts;
+	mSpriteShader->Unload();
+	delete mSpriteShader;
+	SDL_GL_DeleteContext(mContext);
 	SDL_DestroyWindow(mWindow);
 	SDL_Quit();
 }

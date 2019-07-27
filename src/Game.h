@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include "VertexArray.h"
 
 class Game
 {
@@ -39,6 +40,7 @@ private:
 	void UpdateGame();
 	void GenerateOutput();
 	bool LoadShaders();
+	void CreateSpriteVerts();
 	void LoadData();
 	void UnloadData();
 
@@ -55,7 +57,7 @@ private:
 	// Sprite shader
 	class Shader* mSpriteShader;
 	// Sprite vertex array
-	class VertexArray* mSpriteVerts;
+	VertexArray* mSpriteVerts;
 
 	SDL_Window *mWindow;
 	SDL_GLContext mContext; // SDL_Renderer* mRenderer;
