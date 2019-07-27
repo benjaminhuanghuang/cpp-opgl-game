@@ -7,9 +7,7 @@
 // ----------------------------------------------------------------
 
 #pragma once
-
-#include <SDL2/SDL.h>
-
+#include <SDL.h>
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -28,8 +26,8 @@ public:
 	void AddSprite(class SpriteComponent* sprite);
 	void RemoveSprite(class SpriteComponent* sprite);
 	
-	class Texture* GetTexture(const std::string& fileName);
-	
+	SDL_Texture* GetTexture(const std::string& fileName);
+
 	// Game-specific (add/remove asteroid)
 	void AddAsteroid(class Asteroid* ast);
 	void RemoveAsteroid(class Asteroid* ast);
@@ -38,13 +36,11 @@ private:
 	void ProcessInput();
 	void UpdateGame();
 	void GenerateOutput();
-	bool LoadShaders();
-	void CreateSpriteVerts();
 	void LoadData();
 	void UnloadData();
 	
 	// Map of textures loaded
-	std::unordered_map<std::string, class Texture*> mTextures;
+	std::unordered_map<std::string, SDL_Texture*> mTextures;
 
 	// All the actors in the game
 	std::vector<class Actor*> mActors;
@@ -54,19 +50,14 @@ private:
 	// All the sprite components drawn
 	std::vector<class SpriteComponent*> mSprites;
 
-	// Sprite shader
-	class Shader* mSpriteShader;
-	// Sprite vertex array
-	class VertexArray* mSpriteVerts;
-
 	SDL_Window* mWindow;
-	SDL_GLContext mContext;
+	SDL_GLContext mContext;   // SDL_Renderer* mRenderer;
 	Uint32 mTicksCount;
 	bool mIsRunning;
 	// Track if we're updating actors right now
 	bool mUpdatingActors;
 
 	// Game-specific
-	class Ship* mShip;
+	class Ship* mShip; // Player's ship
 	std::vector<class Asteroid*> mAsteroids;
 };

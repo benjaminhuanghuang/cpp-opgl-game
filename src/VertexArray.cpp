@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------
 // From Game Programming in C++ by Sanjay Madhav
 // Copyright (C) 2017 Sanjay Madhav. All rights reserved.
-// 
+//
 // Released under the BSD License
 // See LICENSE in root directory for full details.
 // ----------------------------------------------------------------
@@ -9,10 +9,9 @@
 #include "VertexArray.h"
 #include <GL/glew.h>
 
-VertexArray::VertexArray(const float* verts, unsigned int numVerts,
-	const unsigned int* indices, unsigned int numIndices)
-	:mNumVerts(numVerts)
-	,mNumIndices(numIndices)
+VertexArray::VertexArray(const float *verts, unsigned int numVerts,
+												 const unsigned int *indices, unsigned int numIndices) : mNumVerts(numVerts),
+																																								 mNumIndices(numIndices)
 {
 	// Create vertex array
 	glGenVertexArrays(1, &mVertexArray);
@@ -35,7 +34,7 @@ VertexArray::VertexArray(const float* verts, unsigned int numVerts,
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5,
-		reinterpret_cast<void*>(sizeof(float) * 3));
+												reinterpret_cast<void *>(sizeof(float) * 3));
 }
 
 VertexArray::~VertexArray()
