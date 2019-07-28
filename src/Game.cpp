@@ -204,6 +204,8 @@ void Game::UpdateGame()
 	{
 		delete actor;
 	}
+	// Update audio system
+	mAudioSystem->Update(deltaTime);
 }
 
 void Game::GenerateOutput()
