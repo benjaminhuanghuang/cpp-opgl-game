@@ -7,7 +7,6 @@
 // ----------------------------------------------------------------
 
 #pragma once
-
 class VertexArray
 {
 public:
@@ -15,9 +14,7 @@ public:
 		const unsigned int* indices, unsigned int numIndices);
 	~VertexArray();
 
-	// Activate this vertex array (so we can draw it)
 	void SetActive();
-
 	unsigned int GetNumIndices() const { return mNumIndices; }
 	unsigned int GetNumVerts() const { return mNumVerts; }
 private:
