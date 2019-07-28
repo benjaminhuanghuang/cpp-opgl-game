@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include "VertexArray.h"
+#include "SoundEvent.h"
 
 class Game
 {
@@ -22,23 +23,28 @@ public:
 	void RunLoop();
 	void Shutdown();
 
-	void AddActor(class Actor* actor);
-	void RemoveActor(class Actor* actor);
+	void AddActor(class Actor *actor);
+	void RemoveActor(class Actor *actor);
 
-	class Renderer* GetRenderer() { return mRenderer; }
+	class Renderer *GetRenderer() { return mRenderer; }
+	class AudioSystem *GetAudioSystem() { return mAudioSystem; }
+
 private:
 	void ProcessInput();
+	void HandleKeyPress(int key);
+
 	void UpdateGame();
 	void GenerateOutput();
 	void LoadData();
 	void UnloadData();
-	
-	// All the actors in the game
-	std::vector<class Actor*> mActors;
-	// Any pending actors
-	std::vector<class Actor*> mPendingActors;
 
-	class Renderer* mRenderer;
+	// All the actors in the game
+	std::vector<class Actor *> mActors;
+	// Any pending actors
+	std::vector<class Actor *> mPendingActors;
+
+	class Renderer *mRenderer;
+	class AudioSystem *mAudioSystem;
 
 	Uint32 mTicksCount;
 	bool mIsRunning;
@@ -46,5 +52,7 @@ private:
 	bool mUpdatingActors;
 
 	// Game-specific code
-	class CameraActor* mCameraActor;
+	class CameraActor *mCameraActor;
+	SoundEvent mMusicEvent;
+	SoundEvent mReverbSnap;
 };

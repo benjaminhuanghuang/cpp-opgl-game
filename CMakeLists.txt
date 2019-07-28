@@ -15,6 +15,10 @@ set(SOIL_LIBRARY "/usr/local/lib/libSOIL.a")
 # set(OPENGL_INCLUDE_DIR "/usr/local/Cellar/glew/2.1.0/include")
 # set(OPENGL_LIBRARY "/usr/local/Cellar/glew/2.1.0/lib/libGLEW.a")
 set(GLEW_LIBRARY "/usr/local/Cellar/glew/2.1.0/lib/libGLEW.a")
+set(FMOD_LINCLUDE_DIR "/Users/bhuang/FMOD/api/studio/inc")
+set(FMOD_LIBRARY "/Users/bhuang/FMOD/api/studio/lib")
+set(FMOD_CORE_LINCLUDE_DIR "/Users/bhuang/FMOD/api/core/inc")
+set(FMOD_CORE_LIBRARY "/Users/bhuang/FMOD/api/core/lib")
 
 #MESSAGE(STATUS "The INCLUDE is " ${OPENGL_INCLUDE_DIR})
 #MESSAGE(STATUS "The LIBRARY is " ${OPENGL_LIBRARY})
@@ -24,6 +28,8 @@ include_directories(${SDL2_INCLUDE_DIR}
                     ${SDL2_TTF_INCLUDE_DIR}
                     #${SOIL_INCLUDE_DIR} 
                     #${OPENGL_INCLUDE_DIR}
+                    ${FMOD_LINCLUDE_DIR}
+                    ${FMOD_CORE_LINCLUDE_DIR}
                     src)
                     
 file(GLOB project_SRCS src/*.cpp) #src/*.h
@@ -36,4 +42,7 @@ target_link_libraries(Main ${SDL2_LIBRARY}
                              ${SDL2_TTF_LIBRARY}
                              ${OPENGL_LIBRARY}
                              ${GLEW_LIBRARY}
-                             ${SOIL_LIBRARY})
+                             ${SOIL_LIBRARY}
+                             ${FMOD_LIBRARY}
+                             ${FMOD_CORE_LIBRARY}
+                             )

@@ -14,19 +14,21 @@
 #include "SpriteComponent.h"
 #include "Random.h"
 #include "Texture.h"
+#include "AudioSystem.h"
 #include "Renderer.h"
 #include "MeshComponent.h"
 #include "CameraActor.h"
 #include "PlaneActor.h"
+#include "AudioComponent.h"
 
-Game::Game() : mRenderer(nullptr), mIsRunning(true), mUpdatingActors(false)
+Game::Game() : mRenderer(nullptr), mAudioSystem(nullptr), mIsRunning(true), mUpdatingActors(false)
 {
 }
 
 bool Game::Initialize()
 {
-	
-	if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) != 0)
+
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
 	{
 		SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
 		return false;
@@ -41,11 +43,21 @@ bool Game::Initialize()
 		mRenderer = nullptr;
 		return false;
 	}
+	// Create the audio system
+	mAudioSystem = new AudioSystem(this);
+	if (!mAudioSystem->Initialize())
+	{
+		SDL_Log("Failed to initialize audio system");
+		mAudioSystem->Shutdown();
+		delete mAudioSystem;
+		mAudioSystem = nullptr;
+		return false;
+	}
 
 	LoadData();
 
 	mTicksCount = SDL_GetTicks();
-	
+
 	return true;
 }
 
@@ -84,6 +96,58 @@ void Game::ProcessInput()
 		actor->ProcessInput(keyState);
 	}
 	mUpdatingActors = false;
+}
+
+void Game::HandleKeyPress(int key)
+{
+	switch (key)
+	{
+	case '-':
+	{
+		// Reduce master volume
+		float volume = mAudioSystem->GetBusVolume("bus:/");
+		volume = Math::Max(0.0f, volume - 0.1f);
+		mAudioSystem->SetBusVolume("bus:/", volume);
+		break;
+	}
+	case '=':
+	{
+		// Increase master volume
+		float volume = mAudioSystem->GetBusVolume("bus:/");
+		volume = Math::Min(1.0f, volume + 0.1f);
+		mAudioSystem->SetBusVolume("bus:/", volume);
+		break;
+	}
+	case 'e':
+		// Play explosion
+		mAudioSystem->PlayEvent("event:/Explosion2D");
+		break;
+	case 'm':
+		// Toggle music pause state
+		mMusicEvent.SetPaused(!mMusicEvent.GetPaused());
+		break;
+	case 'r':
+		// Stop or start reverb snapshot
+		if (!mReverbSnap.IsValid())
+		{
+			mReverbSnap = mAudioSystem->PlayEvent("snapshot:/WithReverb");
+		}
+		else
+		{
+			mReverbSnap.Stop();
+		}
+		break;
+	case '1':
+		// Set default footstep surface
+		mCameraActor->SetFootstepSurface(0.0f);
+		break;
+	case '2':
+		// Set grass footstep surface
+		mCameraActor->SetFootstepSurface(0.5f);
+		break;
+	default:
+		break;
+	}
 }
 
 void Game::UpdateGame()
@@ -141,13 +205,13 @@ void Game::GenerateOutput()
 void Game::LoadData()
 {
 	// Create actors
-	Actor* a = new Actor(this);
+	Actor *a = new Actor(this);
 	a->SetPosition(Vector3(200.0f, 75.0f, 0.0f));
 	a->SetScale(100.0f);
 	Quaternion q(Vector3::UnitY, -Math::PiOver2);
 	q = Quaternion::Concatenate(q, Quaternion(Vector3::UnitZ, Math::Pi + Math::Pi / 4.0f));
 	a->SetRotation(q);
-	MeshComponent* mc = new MeshComponent(a);
+	MeshComponent *mc = new MeshComponent(a);
 	mc->SetMesh(mRenderer->GetMesh("Assets/Cube.gpmesh"));
 
 	a = new Actor(this);
@@ -175,7 +239,7 @@ void Game::LoadData()
 		a = new PlaneActor(this);
 		a->SetPosition(Vector3(start + i * size, start - size, 0.0f));
 		a->SetRotation(q);
-		
+
 		a = new PlaneActor(this);
 		a->SetPosition(Vector3(start + i * size, -start + size, 0.0f));
 		a->SetRotation(q);
@@ -196,7 +260,7 @@ void Game::LoadData()
 
 	// Setup lights
 	mRenderer->SetAmbientLight(Vector3(0.2f, 0.2f, 0.2f));
-	DirectionalLight& dir = mRenderer->GetDirectionalLight();
+	DirectionalLight &dir = mRenderer->GetDirectionalLight();
 	dir.mDirection = Vector3(0.0f, -0.707f, -0.707f);
 	dir.mDiffuseColor = Vector3(0.78f, 0.88f, 1.0f);
 	dir.mSpecColor = Vector3(0.8f, 0.8f, 0.8f);
@@ -207,7 +271,7 @@ void Game::LoadData()
 	// UI elements
 	a = new Actor(this);
 	a->SetPosition(Vector3(-350.0f, -350.0f, 0.0f));
-	SpriteComponent* sc = new SpriteComponent(a);
+	SpriteComponent *sc = new SpriteComponent(a);
 	sc->SetTexture(mRenderer->GetTexture("Assets/HealthBar.png"));
 
 	a = new Actor(this);
@@ -238,6 +302,10 @@ void Game::Shutdown()
 	if (mRenderer)
 	{
 		mRenderer->Shutdown();
+	}
+	if (mAudioSystem)
+	{
+		mAudioSystem->Shutdown();
 	}
 	SDL_Quit();
 }
