@@ -81,6 +81,15 @@ void Game::ProcessInput()
 		case SDL_QUIT:
 			mIsRunning = false;
 			break;
+		// This fires when a key's initially pressed
+		case SDL_KEYDOWN:
+			if (!event.key.repeat)
+			{
+				HandleKeyPress(event.key.keysym.sym);
+			}
+			break;
+		default:
+			break;
 		}
 	}
 
